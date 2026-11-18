@@ -13,11 +13,20 @@ BUILD_DIR=${ISH_BUILD_DIR:-"$ISH_SOURCE_ROOT/build-xcode/$BUILD_STYLE-$SDK_NAME-
 OUTPUT_DIR=${ISH_OUTPUT_DIR:-"$BUILD_DIR/out"}
 CROSS_FILE="$BUILD_DIR/cross-file.txt"
 
+case "$SDK_NAME" in
+    iphonesimulator*)
+        VERSION_MIN_FLAG="-mios-simulator-version-min=$DEPLOYMENT_TARGET"
+        ;;
+    *)
+        VERSION_MIN_FLAG="-mios-version-min=$DEPLOYMENT_TARGET"
+        ;;
+esac
+
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 
 cat > "$CROSS_FILE" <<EOF
 [binaries]
-c = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'clang', '-arch', '$ARCH', '-isysroot', '$SDKROOT', '-mios-version-min=$DEPLOYMENT_TARGET']
+c = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'clang', '-arch', '$ARCH', '-isysroot', '$SDKROOT', '$VERSION_MIN_FLAG']
 ar = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'ar']
 strip = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'strip']
 pkg-config = 'false'
