@@ -46,6 +46,8 @@ fi
 
 "$NATIVE_BUILD_DIR/tools/fakefsify" "$TARBALL" "$WORK_DIR/alpine-rootfs"
 printf 'aarch64\n' > "$WORK_DIR/alpine-rootfs/.arch"
-ditto -c -k --keepParent "$WORK_DIR/alpine-rootfs" "$OUTPUT_PATH"
+sqlite3 "$WORK_DIR/alpine-rootfs/meta.db" 'PRAGMA wal_checkpoint(TRUNCATE);'
+rm -f "$WORK_DIR/alpine-rootfs/meta.db-shm" "$WORK_DIR/alpine-rootfs/meta.db-wal"
+ditto -c -k --norsrc --noextattr --keepParent "$WORK_DIR/alpine-rootfs" "$OUTPUT_PATH"
 
 printf 'Alpine fakefs rootfs: %s\n' "$OUTPUT_PATH"
