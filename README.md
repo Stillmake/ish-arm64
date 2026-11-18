@@ -1,5 +1,38 @@
 # [iSH](https://ish.app)
 
+> ## 🚀 ARM64 Fork Notice
+>
+> **This repository is a fork of [ish-app/ish](https://github.com/ish-app/ish)** that adds a
+> **native ARM64 guest backend** to upstream iSH's threaded-code interpreter (*Asbestos*,
+> renamed from *jit* upstream in 2024 — [ish-app/ish@d375656f](https://github.com/ish-app/ish/commit/d375656f)).
+> It emulates AArch64 Linux on Apple Silicon, running alongside the original x86 (i386)
+> guest backend.
+>
+> Asbestos is **not a JIT** — it doesn't emit machine code at runtime. For each basic block
+> it builds an array of pointers to pre-compiled native "gadget" functions that tail-call
+> each other (the threaded-code technique Forth interpreters use). This fork's contribution
+> is the **ARM64 guest backend** inside that framework: new hand-written ARM64 gadgets that
+> map each AArch64 guest instruction to just a handful of host instructions — same-architecture
+> dispatch, so the overhead per guest instruction is small.
+>
+> **Key enhancements over upstream:**
+> - **Native ARM64 gadget dispatch** — same-architecture, 2-12x faster than x86 for compute
+> - **48-bit virtual address space** — 4-level page table supports V8/Go/Rust runtimes
+> - **Node.js 22 / npm / npx** — V8 guard pages, binary patch, `--jitless` injection
+> - **Go and Rust** — large VA reservations, signal frame alignment, FUTEX_WAIT_BITSET, PMULL
+> - **Full NEON + Crypto** — AES/SHA/CRC32 instructions for TLS and hashing at native-ish speed
+> - **Agent integration** — `ISHShellExecutor` (Obj-C shell API), `DebugServer` (JSON-RPC over HTTP),
+>   `Native Offload` (bypass emulation for selected binaries), bind mounts for host↔guest file sharing
+> - **iOS-first rootfs** — Alpine 3.21 aarch64 with full `apk` ecosystem and versioned overlay patching
+>
+> **Performance (ARM64 vs x86, compute-heavy):** C `int_arith_2M` **12x faster**,
+> Python `fib(30)` **9.2x faster**, `sum(1M)` **10.2x faster**, shell `seq+awk 100K` **7.2x faster**.
+>
+> **Full docs:** [README_arm64.md](README_arm64.md) · [中文版](README_arm64_zh.md) ·
+> [Performance report](benchmark/BENCHMARK_PERF.md) · [Compatibility report](benchmark/BENCHMARK_COMPAT.md)
+>
+> ---
+
 [![Build Status](https://github.com/ish-app/ish/actions/workflows/ci.yml/badge.svg)](https://github.com/ish-app/ish/actions)
 [![goto counter](https://img.shields.io/github/search/ish-app/ish/goto.svg)](https://github.com/ish-app/ish/search?q=goto)
 [![fuck counter](https://img.shields.io/github/search/ish-app/ish/fuck.svg)](https://github.com/ish-app/ish/search?q=fuck)
