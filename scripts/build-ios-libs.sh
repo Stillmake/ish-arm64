@@ -33,14 +33,14 @@ needs_exe_wrapper = true
 sys_root = '$SDKROOT'
 EOF
 
-MESON_ARGS="--cross-file $CROSS_FILE --buildtype releaseoptimized -Db_ndebug=true -Dlog= -Dlog_handler=nslog -Dengine=asbestos -Dkernel=ish -Dguest_arch=arm64"
+MESON_ARGS="--cross-file $CROSS_FILE --buildtype release -Db_ndebug=true -Dlog= -Dlog_handler=nslog -Dengine=asbestos -Dkernel=ish -Dguest_arch=arm64"
 
 if [ ! -f "$BUILD_DIR/build.ninja" ]; then
     # shellcheck disable=SC2086
     meson setup "$BUILD_DIR" "$ISH_SOURCE_ROOT" $MESON_ARGS
 else
     meson configure "$BUILD_DIR" \
-        --buildtype releaseoptimized \
+        --buildtype release \
         -Db_ndebug=true \
         -Dlog= \
         -Dlog_handler=nslog \
