@@ -4,7 +4,17 @@ set -eu
 
 ISH_SOURCE_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 SDK_NAME=${SDK_NAME:-iphoneos}
-SDKROOT=$(xcrun --sdk "$SDK_NAME" --show-sdk-path)
+case "$SDK_NAME" in
+    iphonesimulator*)
+        SDK_FOR_XCRUN=iphonesimulator
+        VERSION_MIN_FLAG="-mios-simulator-version-min=${IPHONEOS_DEPLOYMENT_TARGET:-18.0}"
+        ;;
+    *)
+        SDK_FOR_XCRUN=iphoneos
+        VERSION_MIN_FLAG="-mios-version-min=${IPHONEOS_DEPLOYMENT_TARGET:-18.0}"
+        ;;
+esac
+SDKROOT=$(xcrun --sdk "$SDK_FOR_XCRUN" --show-sdk-path)
 ARCH=${ARCHS%% *}
 ARCH=${ARCH:-arm64}
 BUILD_STYLE=${CONFIGURATION:-Debug}
@@ -13,22 +23,13 @@ BUILD_DIR=${ISH_BUILD_DIR:-"$ISH_SOURCE_ROOT/build-xcode/$BUILD_STYLE-$SDK_NAME-
 OUTPUT_DIR=${ISH_OUTPUT_DIR:-"$BUILD_DIR/out"}
 CROSS_FILE="$BUILD_DIR/cross-file.txt"
 
-case "$SDK_NAME" in
-    iphonesimulator*)
-        VERSION_MIN_FLAG="-mios-simulator-version-min=$DEPLOYMENT_TARGET"
-        ;;
-    *)
-        VERSION_MIN_FLAG="-mios-version-min=$DEPLOYMENT_TARGET"
-        ;;
-esac
-
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 
 cat > "$CROSS_FILE" <<EOF
 [binaries]
-c = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'clang', '-arch', '$ARCH', '-isysroot', '$SDKROOT', '$VERSION_MIN_FLAG']
-ar = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'ar']
-strip = ['/usr/bin/xcrun', '--sdk', '$SDK_NAME', 'strip']
+c = ['/usr/bin/xcrun', '--sdk', '$SDK_FOR_XCRUN', 'clang', '-arch', '$ARCH', '-isysroot', '$SDKROOT', '$VERSION_MIN_FLAG']
+ar = ['/usr/bin/xcrun', '--sdk', '$SDK_FOR_XCRUN', 'ar']
+strip = ['/usr/bin/xcrun', '--sdk', '$SDK_FOR_XCRUN', 'strip']
 pkg-config = 'false'
 
 [host_machine]
