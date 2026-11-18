@@ -7,16 +7,17 @@ ALPINE_VERSION=${ALPINE_VERSION:-3.21.0}
 ALPINE_ARCH=${ALPINE_ARCH:-aarch64}
 CACHE_DIR=${ISH_CACHE_DIR:-"$ISH_SOURCE_ROOT/.cache"}
 NATIVE_BUILD_DIR=${ISH_NATIVE_BUILD_DIR:-"$ISH_SOURCE_ROOT/build-native"}
-OUTPUT_PATH=${ISH_ROOTFS_OUTPUT:?Set ISH_ROOTFS_OUTPUT to the destination ZIP path}
+OUTPUT_DIR=${ISH_ROOTFS_OUTPUT:?Set ISH_ROOTFS_OUTPUT to the destination directory}
 TARBALL="$CACHE_DIR/alpine-minirootfs-$ALPINE_VERSION-$ALPINE_ARCH.tar.gz"
 WORK_DIR=$(mktemp -d)
+STAGING_DIR="$OUTPUT_DIR.installing"
 
 cleanup() {
-    rm -rf "$WORK_DIR"
+    rm -rf "$WORK_DIR" "$STAGING_DIR"
 }
 trap cleanup EXIT
 
-mkdir -p "$CACHE_DIR" "$(dirname "$OUTPUT_PATH")"
+mkdir -p "$CACHE_DIR" "$(dirname "$OUTPUT_DIR")"
 
 if [ ! -f "$TARBALL" ]; then
     curl -fL \
@@ -48,6 +49,9 @@ fi
 printf 'aarch64\n' > "$WORK_DIR/alpine-rootfs/.arch"
 sqlite3 "$WORK_DIR/alpine-rootfs/meta.db" 'PRAGMA wal_checkpoint(TRUNCATE);'
 rm -f "$WORK_DIR/alpine-rootfs/meta.db-shm" "$WORK_DIR/alpine-rootfs/meta.db-wal"
-ditto -c -k --norsrc --noextattr --keepParent "$WORK_DIR/alpine-rootfs" "$OUTPUT_PATH"
+rm -rf "$STAGING_DIR"
+ditto --norsrc --noextattr "$WORK_DIR/alpine-rootfs" "$STAGING_DIR"
+rm -rf "$OUTPUT_DIR"
+mv "$STAGING_DIR" "$OUTPUT_DIR"
 
-printf 'Alpine fakefs rootfs: %s\n' "$OUTPUT_PATH"
+printf 'Alpine fakefs rootfs: %s\n' "$OUTPUT_DIR"
