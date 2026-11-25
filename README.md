@@ -71,6 +71,20 @@ You'll need these things to build the project:
 
 Open the project in Xcode, open iSH.xcconfig, and change `ROOT_BUNDLE_IDENTIFIER` to something unique. You'll also need to update the development team ID in the project (not target!) build settings. Then click Run. There are scripts that should do everything else automatically. If you run into any problems, open an issue and I'll try to help.
 
+### MChat binary artifact updates
+
+Rebuild and publish a new artifact to `Stillmake/MChat-iSH-Binaries` when any of the following changes:
+
+- The iSH ARM64 source commit changes, including fixes, behavior changes, ABI changes, or header changes.
+- `libish.a`, `libish_emu.a`, `libfakefs.a`, exported headers, or their link requirements change.
+- `ISHPersistentShell`, `ISHKernel`, `ISHShellExecutor`, or the iSH API used by MChat changes.
+- The Alpine rootfs, its package set, filesystem layout, `meta.db`, or architecture changes.
+- The Xcode version used for the MChat build baseline changes.
+- The iPhoneOS SDK version used for the MChat build baseline changes.
+- `IPHONEOS_DEPLOYMENT_TARGET` changes.
+- The supported architecture changes, including adding or removing arm64, simulator, or device builds.
+- iSH build flags, Meson options, compiler settings, VMM dependencies, or static-library dependencies change.
+
 ## Build command line tool for testing
 
 To set up your environment, cd to the project and run `meson build` to create a build directory in `build`. Then cd to the build directory and run `ninja`.
